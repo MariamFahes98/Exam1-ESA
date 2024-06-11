@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let cont1 = document.getElementById('cont1');
     let cont2 = document.getElementById('cont2');
     let cont3 = document.getElementById('cont3');
-    let idcount = 0;
-    let items = [];
     let searchInput2 = document.getElementById('search3');
     let searchButton = document.getElementById('searchItem');
     let deleteButton = document.getElementById('deleteItemButton');
     
+    let idCount = 0;
+    let items = [];
     function validateInputs() {
         const isCheckboxChecked = checkbox1.checked || checkbox2.checked;
         if (searchInput.value.trim() && isCheckboxChecked) {
@@ -23,53 +23,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function specificListButton1(event) {
+    function handleSpecificListButton(event) {
         if (validateInputs()) {
+            let data;
             if (checkbox1.checked) {
-                let data = `<div class="alert alert-danger" id="divid${idcount}">Fruits!-<span id="itemid${idcount}">${searchInput.value}</span></div>`;
-                items[idcount] = searchInput.value;
-                idcount++;
+                data = `<div class="alert alert-danger" id="divid${idCount}">Fruits! - <span id="itemid${idCount}">${searchInput.value}</span></div>`;
                 cont1.innerHTML += data;
             } else if (checkbox2.checked) {
-                let data = `<div class="alert alert-success" id="divid${idcount}">Legumes!-<span id="itemid${idcount}">${searchInput.value}</span></div>`;
-                items[idcount] = searchInput.value;
-                idcount++;
+                data = `<div class="alert alert-success" id="divid${idCount}">Legumes! - <span id="itemid${idCount}">${searchInput.value}</span></div>`;
                 cont3.innerHTML += data;
             }
+            items.push({ id: idCount, value: searchInput.value });
+            idCount++;
         } else {
             event.preventDefault();
         }
     }
 
-    function generalListButton1(event) {
+    function handleGeneralListButton(event) {
         if (validateInputs()) {
+            let data;
             if (checkbox1.checked) {
-                let data = `<div class="alert alert-warning" id="divid${idcount}">Fruits!-<span id="itemid${idcount}">${searchInput.value}</span></div>`;
-                items[idcount] = searchInput.value;
-                idcount++;
-                cont2.innerHTML += data;
+                data = `<div class="alert alert-warning" id="divid${idCount}">Fruits! - <span id="itemid${idCount}">${searchInput.value}</span></div>`;
             } else if (checkbox2.checked) {
-                let data = `<div class="alert alert-warning" id="divid${idcount}">Legumes!-<span id="itemid${idcount}">${searchInput.value}</span></div>`;
-                items[idcount] = searchInput.value;
-                idcount++;
-                cont2.innerHTML += data;
+                data = `<div class="alert alert-warning" id="divid${idCount}">Legumes! - <span id="itemid${idCount}">${searchInput.value}</span></div>`;
             }
+            cont2.innerHTML += data;
+            items.push({ id: idCount, value: searchInput.value });
+            idCount++;
         } else {
             event.preventDefault();
         }
     }
-
     function searchItem() {
         let searchTerm = searchInput2.value.trim().toLowerCase();
         if (searchTerm) {
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].toLowerCase().startsWith(searchTerm)) {
-                    let element = document.getElementById(`divid${i}`);
+            items.forEach((item, index) => {
+                if (item.value.toLowerCase().startsWith(searchTerm)) {
+                    let element = document.getElementById(`divid${item.id}`);
                     if (element) {
                         element.style.backgroundColor = 'red';
                     }
                 }
-            }
+            });
         }
     }
 
@@ -77,17 +73,30 @@ document.addEventListener('DOMContentLoaded', function() {
         let searchTerm = searchInput2.value.trim().toLowerCase();
         if (searchTerm) {
             for (let i = 0; i < items.length; i++) {
-                if (items[i].toLowerCase().startsWith(searchTerm)) {
-                    let element = document.getElementById(`divid${i}`);
+                if (items[i].value.toLowerCase().startsWith(searchTerm)) {
+                    let element = document.getElementById(`divid${items[i].id}`);
                     if (element) {
                         element.remove(); 
                         items.splice(i, 1); 
-                        break;
+                        break; 
                     }
                 }
             }
         }
     }
+
+    function handleDivClick(event) {
+        let clickedDiv = event.target.closest('.alert');
+        if (clickedDiv && cont2.contains(clickedDiv)) {
+            let textContent = clickedDiv.textContent.trim();
+            if (textContent.startsWith('Fruits')) {
+                cont1.appendChild(clickedDiv);
+            } else if (textContent.startsWith('Legumes')) {
+                cont3.appendChild(clickedDiv);
+            }
+        }
+    }
+
     checkbox1.addEventListener('change', function() {
         if (checkbox1.checked) {
             checkbox2.checked = false;
@@ -100,8 +109,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    specificListButton.addEventListener('click', specificListButton1);
-    generalListButton.addEventListener('click', generalListButton1);
+    specificListButton.addEventListener('click', handleSpecificListButton);
+    generalListButton.addEventListener('click', handleGeneralListButton);
     searchButton.addEventListener('click', searchItem);
-    deleteButton.addEventListener('click', deleteItem); 
+    deleteButton.addEventListener('click', deleteItem);
+    cont2.addEventListener('click', handleDivClick);
 });
